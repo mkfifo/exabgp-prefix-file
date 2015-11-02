@@ -26,7 +26,8 @@ import re
 import socket
 import sys
 import time
- 
+import os
+
 def valid_ip_address(address):
     """
     Lazy way to validate an IPv4 address.
@@ -34,6 +35,7 @@ def valid_ip_address(address):
     try:
         socket.inet_aton(address)
     except:
+        sys.stderr.write("Warning: invalid ip address '%s'" %(address))
         return False
     else:
         return True
@@ -52,7 +54,7 @@ if __name__ == "__main__":
     community = ""
 
     if args.community is not "":
-    
+
         if re.match("[0-9]+:[0-9]+", args.community):
             community = " community %s" % args.community
         else:
@@ -63,14 +65,19 @@ if __name__ == "__main__":
         sys.stderr.write("error: invalid next-hop address\n")
         sys.exit(1)
 
+    if not os.path.exists(args.prefix_file):
+        sys.stderr.write("error: file '%s' doesn't exist" %(args.prefix_file))
+        sys.exit(1)
 
     while True:
         time.sleep(args.interval)
-        
+        requested_prefixed = set()
+
         try:
             with open(args.prefix_file) as prefix_file:
                 requested_prefixes = set([address for address in prefix_file.read().splitlines() if valid_ip_address(address)])
         except:
+            sys.stderr.write("Warning: failed to open file {}" %(args.prefix_file))
             continue
 
         prefix = None
@@ -84,4 +91,4 @@ if __name__ == "__main__":
         if prefix is not None:
             sys.stdout.flush()
             current_prefixes = requested_prefixes
-            
+
