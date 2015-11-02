@@ -71,13 +71,13 @@ if __name__ == "__main__":
 
     while True:
         time.sleep(args.interval)
-        requested_prefixed = set()
+        requested_prefixes = set()
 
         try:
             with open(args.prefix_file) as prefix_file:
                 requested_prefixes = set([address for address in prefix_file.read().splitlines() if valid_ip_address(address)])
         except:
-            sys.stderr.write("Warning: failed to open file {}" %(args.prefix_file))
+            sys.stderr.write("Warning: failed to open file %s" %(args.prefix_file))
             continue
 
         prefix = None
